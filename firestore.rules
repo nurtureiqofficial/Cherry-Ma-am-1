@@ -1,0 +1,151 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Global safety net: deny everything by default
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // --- REUSABLE GLOBAL HELPERS ---
+    
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isEmailVerifiedOrAnonymous() {
+      return request.auth.token.email_verified == true || request.auth.token.firebase.sign_in_provider == 'anonymous';
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    // Helper to check if a user is the owner of a class session
+    function isSessionOwner(sessId) {
+      return get(/databases/$(database)/documents/classSessions/$(sessId)).data.userId == request.auth.uid;
+    }
+
+    // --- ENTITY VALIDATION BLUEPRINTS ---
+
+    // Student Profile Validator
+    function isValidStudentProfile(data) {
+      return data.keys().hasAll(['userId', 'name', 'grade', 'subject', 'updatedAt']) &&
+        data.keys().size() >= 5 && data.keys().size() <= 7 &&
+        data.userId is string && data.userId.size() <= 128 &&
+        data.userId == request.auth.uid &&
+        data.name is string && data.name.size() <= 100 &&
+        data.grade is string && data.grade.size() <= 50 &&
+        data.subject is string && data.subject.size() <= 50 &&
+        (!data.keys().contains('board') || (data.board is string && data.board.size() <= 50)) &&
+        (!data.keys().contains('mediumOfLearning') || (data.mediumOfLearning is string && data.mediumOfLearning.size() <= 50)) &&
+        data.updatedAt == request.time;
+    }
+
+    // Classroom Session Validator
+    function isValidClassSession(data) {
+      return data.keys().hasAll(['sessionId', 'userId', 'grade', 'subject', 'createdAt', 'updatedAt']) &&
+        data.keys().size() >= 6 && data.keys().size() <= 8 &&
+        data.sessionId is string && data.sessionId.size() <= 128 &&
+        data.userId is string && data.userId.size() <= 128 &&
+        data.userId == request.auth.uid &&
+        data.grade is string && data.grade.size() <= 50 &&
+        data.subject is string && data.subject.size() <= 50 &&
+        (!data.keys().contains('activeDocumentName') || (data.activeDocumentName is string && data.activeDocumentName.size() <= 200)) &&
+        (!data.keys().contains('customBoardContent') || (data.customBoardContent is string && data.customBoardContent.size() <= 100000)) &&
+        data.createdAt == (resource == null ? request.time : resource.data.createdAt) &&
+        data.updatedAt == request.time;
+    }
+
+    // Dialogue Message Validator
+    function isValidDialogueMessage(data) {
+      return data.keys().hasAll(['messageId', 'sessionId', 'sender', 'text', 'timestamp']) &&
+        data.keys().size() == 5 &&
+        data.messageId is string && data.messageId.size() <= 128 &&
+        data.sessionId is string && data.sessionId.size() <= 128 &&
+        data.sender is string && (data.sender == 'user' || data.sender == 'cherry') &&
+        data.text is string && data.text.size() <= 5000 &&
+        data.timestamp == request.time;
+    }
+
+    // Board Snapshot Validator
+    function isValidBoardSnapshot(data) {
+      return data.keys().hasAll(['snapshotId', 'userId', 'topicTitle', 'description', 'imgData', 'timestamp']) &&
+        data.keys().size() == 6 &&
+        data.snapshotId is string && data.snapshotId.size() <= 128 &&
+        data.userId is string && data.userId.size() <= 128 &&
+        data.userId == request.auth.uid &&
+        data.topicTitle is string && data.topicTitle.size() <= 200 &&
+        data.description is string && data.description.size() <= 1000 &&
+        data.imgData is string && data.imgData.size() <= 200000 &&
+        data.timestamp == request.time;
+    }
+
+    // --- COLLECTION RULE MATCHERS ---
+
+    // Student Profiles (secured by document ID matching auth.uid)
+    match /studentProfiles/{userId} {
+      allow get: if isSignedIn() && request.auth.uid == userId;
+      
+      allow create: if isSignedIn() && isEmailVerifiedOrAnonymous() && isValidId(userId) && request.auth.uid == userId && isValidStudentProfile(incoming());
+      
+      allow update: if isSignedIn() && isEmailVerifiedOrAnonymous() && request.auth.uid == userId && isValidStudentProfile(incoming()) && (
+        existing().userId == request.auth.uid &&
+        incoming().userId == existing().userId &&
+        incoming().diff(existing()).affectedKeys().hasOnly(['name', 'grade', 'subject', 'board', 'mediumOfLearning', 'updatedAt'])
+      );
+      
+      allow delete: if false; // Profiles cannot be deleted by students to prevent orphaned resources
+
+      // Board snapshots belonging to this student
+      match /boardSnapshots/{snapshotId} {
+        allow get: if isSignedIn() && request.auth.uid == userId && resource.data.userId == request.auth.uid;
+        allow list: if isSignedIn() && request.auth.uid == userId && resource.data.userId == request.auth.uid;
+        
+        allow create: if isSignedIn() && isEmailVerifiedOrAnonymous() && isValidId(snapshotId) && request.auth.uid == userId && isValidBoardSnapshot(incoming());
+        allow update: if false; // Board snapshots are immutable
+        allow delete: if isSignedIn() && request.auth.uid == userId && resource.data.userId == request.auth.uid;
+      }
+
+      // Quiz attempts belonging to this student
+      match /quizAttempts/{attemptId} {
+        allow get, list, create: if isSignedIn() && request.auth.uid == userId;
+        allow update, delete: if false; // Quiz attempts are historically immutable
+      }
+    }
+
+    // Classroom Sessions
+    match /classSessions/{sessionId} {
+      allow get: if isSignedIn() && resource.data.userId == request.auth.uid;
+      allow list: if isSignedIn() && resource.data.userId == request.auth.uid;
+      
+      allow create: if isSignedIn() && isEmailVerifiedOrAnonymous() && isValidId(sessionId) && isValidClassSession(incoming());
+      
+      allow update: if isSignedIn() && isEmailVerifiedOrAnonymous() && isValidId(sessionId) && isValidClassSession(incoming()) && (
+        existing().userId == request.auth.uid &&
+        incoming().userId == existing().userId &&
+        incoming().createdAt == existing().createdAt &&
+        incoming().diff(existing()).affectedKeys().hasOnly(['customBoardContent', 'updatedAt'])
+      );
+      
+      allow delete: if isSignedIn() && resource.data.userId == request.auth.uid;
+
+      // Dialogue Messages under class sessions
+      match /dialogueMessages/{messageId} {
+        allow get: if isSignedIn() && isSessionOwner(sessionId);
+        allow list: if isSignedIn() && isSessionOwner(sessionId);
+        
+        allow create: if isSignedIn() && isEmailVerifiedOrAnonymous() && isValidId(messageId) && isSessionOwner(sessionId) && isValidDialogueMessage(incoming());
+        allow update, delete: if false; // Dialogue message transcripts are historically immutable
+      }
+    }
+  }
+}

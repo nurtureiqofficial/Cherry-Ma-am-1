@@ -1,0 +1,324 @@
+@import url('https://fonts.googleapis.com/css2?family=Delius&family=Space+Grotesk:wght@400;500;600;700&display=swap');
+@import "tailwindcss";
+@import "katex/dist/katex.min.css";
+
+/* Blackboard Chalkboard Themes & Textures */
+.blackboard-chalk {
+  background-color: #0c201a;
+  background-image: 
+    radial-gradient(rgba(255, 255, 255, 0.08) 1px, transparent 1px),
+    linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+  background-size: 24px 24px, 120px 120px, 120px 120px;
+  background-position: center;
+  box-shadow: inset 0 0 60px rgba(0, 0, 0, 0.9), 0 4px 30px rgba(0, 0, 0, 0.4), 0 0 20px rgba(196, 245, 0, 0.05);
+  border: 2px solid rgba(196, 245, 0, 0.3); /* Ultra-sleek neon interactive frame */
+  border-radius: 16px;
+  position: relative;
+}
+
+/* Simulate realistic slate dust overlay */
+.blackboard-chalk::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at 40% 60%, rgba(255, 255, 255, 0.03) 0%, transparent 80%);
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* Chalky fonts & handwriting simulation */
+.chalk-font {
+  font-family: "Delius", "Comic Sans MS", "Chalkboard SE", "Marker Felt", sans-serif;
+}
+
+.chalk-text-white {
+  color: rgba(245, 245, 245, 0.95);
+  text-shadow: 0 0 2px rgba(255, 255, 255, 0.3), 0 0 4px rgba(255, 255, 255, 0.1);
+}
+
+.chalk-text-yellow {
+  color: rgba(253, 224, 71, 0.95);
+  text-shadow: 0 0 2px rgba(253, 224, 71, 0.3), 0 0 4px rgba(253, 224, 71, 0.1);
+}
+
+.chalk-text-rose {
+  color: rgba(244, 114, 182, 0.95);
+  text-shadow: 0 0 2px rgba(244, 114, 182, 0.3), 0 0 4px rgba(244, 114, 182, 0.1);
+}
+
+.chalk-text-emerald {
+  color: rgba(52, 211, 153, 0.95);
+  text-shadow: 0 0 2px rgba(52, 211, 153, 0.3), 0 0 4px rgba(52, 211, 153, 0.1);
+}
+
+@keyframes fadeInChalk {
+  from {
+    opacity: 0;
+    filter: blur(1px);
+    transform: scale(0.99);
+  }
+  to {
+    opacity: 1;
+    filter: blur(0);
+    transform: scale(1);
+  }
+}
+
+@keyframes pulseSlow {
+  0%, 100% {
+    opacity: 0.95;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.01);
+  }
+}
+
+.animate-chalk-fade {
+  animation: fadeInChalk 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.animate-pulse-slow {
+  animation: pulseSlow 3s infinite ease-in-out;
+}
+
+/* Custom equalizing bouncy waves */
+@keyframes bounceCustom {
+  0%, 100% {
+    transform: scaleY(0.4);
+  }
+  50% {
+    transform: scaleY(1.5);
+  }
+}
+
+.animate-bounce-custom-1 {
+  animation: bounceCustom 0.7s ease-in-out infinite;
+  transform-origin: bottom;
+}
+
+.animate-bounce-custom-2 {
+  animation: bounceCustom 0.7s ease-in-out infinite 0.2s;
+  transform-origin: bottom;
+}
+
+.animate-bounce-custom-3 {
+  animation: bounceCustom 0.7s ease-in-out infinite 0.4s;
+  transform-origin: bottom;
+}
+
+/* Hide scrollbars for slick mobile viewports */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;  /* Firefox */
+}
+
+/* Custom Light Chalkboard theme overrides for high contrast and readability */
+.light-board-chalk {
+  background-color: #ffffff !important;
+  background-image: 
+    radial-gradient(rgba(15, 23, 42, 0.04) 1.5px, transparent 1.5px),
+    linear-gradient(rgba(15, 23, 42, 0.015) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(15, 23, 42, 0.015) 1px, transparent 1px) !important;
+  background-size: 24px 24px, 120px 120px, 120px 120px !important;
+  box-shadow: inset 0 0 40px rgba(0, 0, 0, 0.02), 0 4px 30px rgba(0, 0, 0, 0.04) !important;
+  border-color: rgba(15, 23, 42, 0.1) !important;
+}
+
+.light-board-chalk::before {
+  background: radial-gradient(circle at 40% 60%, rgba(15, 23, 42, 0.02) 0%, transparent 80%) !important;
+}
+
+.light-board-chalk .chalk-font {
+  color: #0f172a !important; /* Premium dark slate/charcoal text for chalk */
+  text-shadow: none !important;
+}
+
+/* Base text elements on the light board */
+.light-board-chalk p, 
+.light-board-chalk span,
+.light-board-chalk div,
+.light-board-chalk .text-zinc-100,
+.light-board-chalk .text-zinc-100\/95,
+.light-board-chalk .text-slate-100,
+.light-board-chalk .text-zinc-150,
+.light-board-chalk .text-zinc-200,
+.light-board-chalk .text-zinc-300,
+.light-board-chalk .text-zinc-400,
+.light-board-chalk .text-slate-200,
+.light-board-chalk .text-slate-300,
+.light-board-chalk .text-slate-400 {
+  color: #0f172a !important;
+  text-shadow: none !important;
+}
+
+/* Secondary meta descriptions or notes */
+.light-board-chalk .text-zinc-500 {
+  color: #52525b !important;
+}
+
+/* KaTeX equations in light board */
+.light-board-chalk .katex {
+  color: #0f172a !important; /* Make sure KaTeX symbols render dark charcoal */
+}
+
+/* Custom Math Block - Green/Mint Box for Final Answers */
+.custom-math-block {
+  max-width: 100% !important;
+  box-sizing: border-box !important;
+  overflow-x: auto !important;
+  overflow-y: hidden !important;
+}
+
+.custom-math-block .katex-display {
+  margin: 0.2em 0 !important;
+  max-width: 100% !important;
+  display: flex !important;
+  justify-content: center !important;
+}
+
+.custom-math-block .katex {
+  white-space: nowrap !important;
+  font-size: clamp(0.85rem, 3.8vw, 1.1rem) !important;
+  text-align: center !important;
+}
+
+.custom-math-block .katex-html {
+  white-space: nowrap !important;
+  display: inline-block !important;
+}
+
+.custom-math-block .katex .base,
+.custom-math-block .katex .mord,
+.custom-math-block .katex .text {
+  white-space: nowrap !important;
+  word-break: normal !important;
+  overflow-wrap: normal !important;
+}
+
+@media (max-width: 640px) {
+  .custom-math-block {
+    padding: 0.75rem !important;
+    font-size: 0.85rem !important;
+  }
+  .custom-math-block .katex {
+    font-size: 0.95em !important;
+  }
+}
+
+.light-board-chalk .custom-math-block {
+  background-color: #cfece8 !important; 
+  border-color: #99d3cb !important;
+  color: #1c3b36 !important; /* High contrast dark teal */
+  text-shadow: none !important;
+  border-radius: 12px !important;
+  box-shadow: 0 4px 10px rgba(153, 211, 203, 0.15) !important;
+}
+
+.light-board-chalk .custom-math-block .katex {
+  color: #1c3b36 !important;
+}
+
+/* Bullet Points - Styled as mini Pastel Pink/Coral Bubbles */
+.light-board-chalk .text-rose-300 {
+  color: #4e221b !important;
+  background-color: #fbcac2 !important;
+  border-color: #f79e91 !important;
+  text-shadow: none !important;
+  box-shadow: 0 2px 4px rgba(247, 158, 145, 0.1) !important;
+}
+
+/* Sub-headings - Dark Teal */
+.light-board-chalk .text-\[\#bae6fd\] {
+  color: #1c3b36 !important; 
+}
+
+/* Headings - Deep Warm Orange-Charcoal */
+.light-board-chalk .text-\[\#fef08a\] {
+  color: #4d2708 !important; 
+}
+
+/* Live Speech Highlight Overlay - Styled as Pastel Lavender Bubble */
+.light-board-chalk .bg-\[\#c4f500\]\/15 {
+  background-color: #e5e2f9 !important;
+  border-color: #c6c2f0 !important;
+  color: #231c4b !important;
+  box-shadow: 0 4px 12px rgba(198, 194, 240, 0.25) !important;
+}
+
+.light-board-chalk .border-\[\#c4f500\]\/30 {
+  border-color: #c6c2f0 !important;
+}
+
+.light-board-chalk .text-white {
+  color: #231c4b !important;
+}
+
+/* Interactive elements and text color token overrides on light chalkboard background */
+.light-board-chalk .text-sky-300 {
+  color: #0284c7 !important; /* Rich sky blue instead of light neon */
+  text-shadow: none !important;
+}
+
+.light-board-chalk .text-cyan-300 {
+  color: #0891b2 !important; /* Rich cyan instead of light neon */
+  text-shadow: none !important;
+}
+
+.light-board-chalk .text-emerald-300 {
+  color: #059669 !important; /* Rich emerald green instead of light neon */
+  text-shadow: none !important;
+}
+
+.light-board-chalk .text-rose-400 {
+  color: #dc2626 !important; /* Rich rose-red instead of light neon */
+  text-shadow: none !important;
+}
+
+.light-board-chalk .text-yellow-200,
+.light-board-chalk .text-yellow-300,
+.light-board-chalk .text-amber-300,
+.light-board-chalk .text-amber-400 {
+  color: #d97706 !important; /* Rich dark amber-yellow instead of light neon */
+  text-shadow: none !important;
+}
+
+.light-board-chalk .text-orange-300 {
+  color: #ea580c !important; /* Rich orange instead of light neon */
+  text-shadow: none !important;
+}
+
+/* Code tokens / inline definitions inside text */
+.light-board-chalk code,
+.light-board-chalk .text-cyan-200 {
+  color: #164e63 !important; /* Deep dark teal-cyan */
+  background-color: #cfece8 !important; /* Pastel mint */
+  border-color: #99d3cb !important;
+  text-shadow: none !important;
+}
+
+.light-board-chalk strong,
+.light-board-chalk .text-yellow-300 {
+  color: #78350f !important; /* Deep warm amber-brown */
+  background-color: #fce1c3 !important; /* Soft pastel orange/amber */
+  border-color: #f8caa2 !important;
+  text-shadow: none !important;
+}
+
+/* Inline formula LaTeX blocks */
+.light-board-chalk [id^="math-inline-"],
+.light-board-chalk .bg-emerald-950\/40 {
+  background-color: #cfece8 !important;
+  border-color: #99d3cb !important;
+  color: #1c3b36 !important;
+  text-shadow: none !important;
+}
+
+
+
+

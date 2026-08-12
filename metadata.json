@@ -1,0 +1,10 @@
+{
+  "name": "3Copy of Cherry AI Classroom",
+  "description": "An interactive Indian Hinglish classroom with a real-time, voice-to-voice tutor assistant named Cherry Ma\u0027am, featuring customized chalk diagrams and synced whiteboard blackboard notes.",
+  "requestFramePermissions": [
+    "microphone"
+  ],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
